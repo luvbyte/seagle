@@ -9,7 +9,7 @@ venv:
 
 # Install dependencies from requirements.txt
 install:
-	$(PYPATH) -m pip install -r requirements.txt
+	venv/bin/python3 -m pip install -r requirements.txt
 	@echo "Dependencies installed."
 
 test:
