@@ -1,0 +1,6 @@
+rich
+pydantic
+cmd2
+beautifulsoup4
+requests
+lupa

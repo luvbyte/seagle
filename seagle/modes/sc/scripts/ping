@@ -1,0 +1,2 @@
+:require site
+:code sg(sg.sh(f"ping -c 3 {sg.site.url.hostname}").run().output())

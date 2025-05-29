@@ -1,0 +1,5 @@
+:code
+@sg.start
+def main():
+  tags = [f"{link}" for link in sg.page.html.find_all(sg.arg(0, "html"))]
+  return None if len(tags) <= 0 else "\n\n".join(tags)

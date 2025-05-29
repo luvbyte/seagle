@@ -1,0 +1,1 @@
+:code sg(sg.page.html.get_text().strip())

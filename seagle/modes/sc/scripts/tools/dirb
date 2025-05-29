@@ -1,0 +1,1 @@
+sg.sh(f"dirb {sg.page.url_string}").pipe()

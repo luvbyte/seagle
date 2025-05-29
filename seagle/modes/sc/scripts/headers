@@ -1,0 +1,9 @@
+
+:code
+@sg.start
+def main():
+  header_name = sg.arg(0)
+  if header_name:
+    return sg.page.res.headers.get(header_name, f"Header '{header_name}' not found")
+
+  return '\n'.join([f"{k} -< {v}" for k, v in sg.page.res.headers.items()])

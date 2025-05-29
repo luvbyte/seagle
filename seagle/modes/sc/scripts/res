@@ -1,0 +1,8 @@
+:code
+@sg.start
+def main():
+  url = sg.arg(0)
+  res = sg.page.res if url is None else sg.page.response(url=url if url.startswith("/") else "/" + url)
+  
+  return res.info()
+
