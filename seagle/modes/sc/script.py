@@ -22,17 +22,13 @@ class ScriptsManager:
     else:
       return self.scripts_path / script_name
 
-  def run_script(self, args, core):
-    return self.load_script(args).run()
+  def run_script(self, script_name, args, core):
+    return self.load_script(script_name).run(core, args)
 
-  def load_script(self, args):
-    if len(args) <= 0:
-      raise Exception("Require script name!!!")
-    
-    script_name = args[0]
+  def load_script(self, script_name: str):
     # check and fetch protocols here
     script_path = check_script_path(self.resolve_path(script_name))
     if script_path is None:
       raise Exception(f"Script [red]'{script_name}'[/] not found")
     
-    return create_handler(script_path, lambda apis: Script(script_path, args[1:], apis))
+    return create_handler(script_path, lambda apis, args: Script(script_path, args, apis))

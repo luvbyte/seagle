@@ -28,7 +28,7 @@ class ScriptBase:
   def init(self):
     pass
 
-  def _parse_custom_format(self, text: str, match_prefix: str) -> dict:
+  def __depricated_parse_custom_format(self, text: str, match_prefix: str) -> dict:
     lines = text.strip().splitlines()
     result = {}
     current_key = None
@@ -53,16 +53,55 @@ class ScriptBase:
 
     return result
 
-  def parse_file(self, filename, match_prefix):
-    with open(filename, "r") as f:
-      return ScriptConfigModel(**self._parse_custom_format(f.read(), match_prefix))
+  def _parse_custom_format(self, text: str, match_prefix: str, stop_key: str) -> dict:
+    lines = text.strip().splitlines()
+    result = {}
+    current_key = None
+    current_value = []
+  
+    i = 0
+    while i < len(lines):
+      line = lines[i]
+      if line.startswith(match_prefix):
+        if current_key is not None:
+          result[current_key] = '\n'.join(current_value).strip()
+  
+        line_content = line[len(match_prefix):].lstrip()
+        if ' ' in line_content:
+          key, value = line_content.split(' ', 1)
+          key = key.strip()
+          value = value.strip()
+        else:
+          key = line_content.strip()
+          value = ''
+  
+        if key == stop_key:
+          code_lines = [value] if value else []
+          code_lines.extend(lines[i + 1:])
+          result['code'] = '\n'.join(code_lines).strip()
+          return result
+  
+        current_key = key
+        current_value = [value] if value else []
+      else:
+        current_value.append(line)
+      i += 1
+  
+    if current_key is not None:
+      result[current_key] = '\n'.join(current_value).strip()
+  
+    return result
 
-  def run(self, core):
+  def parse_file(self, filename, match_prefix, stop_key):
+    with open(filename, "r") as f:
+      return ScriptConfigModel(**self._parse_custom_format(f.read(), match_prefix, stop_key))
+
+  def run(self, core, args):
     return None
 
 class SGScriptHandler(ScriptBase):
   def init(self):
-    self.config = self.parse_file(self.script_path, ":")
+    self.config = self.parse_file(self.script_path, ":", "code")
 
   def lang_py(self, sg):
     exec(self.config.code, { "sg": sg })
@@ -75,15 +114,15 @@ class SGScriptHandler(ScriptBase):
     runtime.execute(self.config.code)
     return sg.retvalue
 
-  def run(self, core):
-    sg = self.get_script({ name: core.namespaces.get(name) for name in self.config.require.split(",") if name in core.namespaces })
+  def run(self, core, args):
+    sg = self.get_script({ name: core.namespaces.get(name) for name in self.config.require.split(",") if name in core.namespaces }, args)
     func = {k: getattr(self, k) for k in dir(self) if k.startswith("lang_")}.get(f"lang_{self.config.lang}")
     if not callable(func):
       raise Exception(f"lang '{self.config.lang}' not support")
     return func(sg)
 
 class TextHandler(ScriptBase):
-  def run(self, core):
+  def run(self, core, args):
     with open(self.script_path, "r") as file:
       return file.read()
 

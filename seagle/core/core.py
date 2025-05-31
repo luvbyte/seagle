@@ -28,7 +28,7 @@ class Core:
 
     self.sites = {}
     self.change_site(url)
-  
+
   @property
   def namespaces(self):
     return {

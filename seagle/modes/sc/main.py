@@ -26,7 +26,11 @@ class SCMode(SimpleMode):
     ]
   
   def _run_script(self, line):
-    runner = self.scripts.load_script(shlex.split(line))
+    split_line = shlex.split(line)
+    if len(split_line) <= 0:
+      raise Exception("Require script name!!!")
+
+    runner = self.scripts.load_script(split_line[0])
     if not runner.config:
       return runner.run(self.core)
       
@@ -42,8 +46,8 @@ class SCMode(SimpleMode):
     if wait_timer > 0 and not self.core.console.wait(wait_timer, "Running script in"):
       raise Exception("Script canceled to run")
   
-    return runner.run(self.core)
-  
+    return runner.run(self.core, split_line[1:])
+
   def default(self, line):
     return self._run_script(line.raw)
   
